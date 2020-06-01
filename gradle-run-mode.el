@@ -1,59 +1,71 @@
+;;; gradle-mode.el --- Minor mode for running gradle build.
+
+;;; Commentary:
+
+;;; Code:
 (require 'compile)
 
-(defcustom gradle-project-dir nil
-  "String representing the root directory of the gradle project where to run gradlew."
-  :group 'gradle
-  :type 'string)
-
-(defcustom gradle-read-build-args t
-  "Specifiy whether to prompt for build arguments."
+(defcustom gradle-mode-read-build-args t
+  "Non nil to prompt for build arguments by gradle-run."
   :group 'gradle
   :type 'boolean)
 
-(defcustom gradle-build-args ""
+(defcustom gradle-mode-build-args nil
   "Build arguments for gradle."
   :group 'gradle
   :type 'string)
 
-(defcustom gradle-read-env-vars t
-  "Specifiy whether to prompt for environment variable(s) to use when running gradle."
-  :group 'gradle
-  :type 'boolean)
-
-(defcustom gradle-env-vars ""
+(defcustom gradle-mode-env-vars nil
   "Build arguments for gradle."
   :group 'gradle
   :type 'string)
 
-(defun gradle-run-directory ()
-  (let ((run-dir (or gradle-project-dir
-                     (locate-dominating-file default-directory "gradlew"))))
-    (or run-dir
+(defvar gradle-mode-gradlew-command (if (string= system-type "windows-nt") "gradlew.bat" "gradlew")
+  "The gradle wrapper command.")
+
+(defun gradle-mode--get-root ()
+  "Return the root directory of the gradle project."
+  (let ((root-dir (or (and (featurep 'projectile) (projectile-project-p))
+                      (locate-dominating-file default-directory gradle-mode-gradlew-command))))
+    (or root-dir
         (user-error "No gradle project to run"))))
 
-(defun gradle-run ()
-  "Run gradle command."
+(defun gradle-mode-set-env ()
+  "Promt to read the environment variables setting for gradle-mode-env-vars."
   (interactive)
-  (if gradle-read-env-vars
-      (setq gradle-env-vars
-            (read-from-minibuffer "Env variables: " gradle-env-vars))
-    (setq gradle-env-vars ""))
+  (setq gradle-mode-env-vars
+        (read-from-minibuffer "Env variables: " gradle-mode-env-vars)))
 
-  (if gradle-read-build-args
-      (setq gradle-build-args
-            (read-from-minibuffer "Build args: " gradle-build-args))
-    (setq gradle-build-args ""))
+(defun gradle-mode-run ()
+  "Run gradle command by interactively read arguments to run."
+  (interactive)
+  (when gradle-mode-read-build-args
+      (setq gradle-mode-build-args
+            (read-from-minibuffer "Build args: " gradle-mode-build-args)))
+  (gradle-mode--run gradle-mode-build-args gradle-mode-env-vars))
 
-  (let ((gradle-build-directory (gradle-run-directory))
-        (saved-default-directory default-directory))
-    (cd gradle-build-directory)
-    (compile (concat gradle-env-vars " " gradle-build-directory "gradlew " gradle-build-args))
-    (cd saved-default-directory))
-  )
+(defun gradle-mode-build ()
+  "Run gradle build task."
+  (interactive)
+  (gradle-mode--run "build" gradle-mode-env-vars))
+
+(defun gradle-mode--run (build-args env-vars)
+  "Run gradle with the specified build arguments and environment variables.
+
+BUILD-ARGS the gradle build arguments to run.
+ENV-VARS the environment variables to use when running gradle."
+
+  (let* ((run-directory (gradle-mode--get-root))
+         (saved-default-directory default-directory)
+         (gradlew-cmd (f-join run-directory gradle-mode-gradlew-command)))
+    (cd run-directory)
+    (compile (concat env-vars " " gradlew-cmd " " build-args))
+    (cd saved-default-directory)))
 
 (defvar gradle-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-g b") 'gradle-run)
+    (define-key map (kbd "C-c C-g b") 'gradle-mode-build)
+    (define-key map (kbd "C-c C-g r") 'gradle-mode-run)
     map)
   "Keymap for the gradle minor mode.")
 
@@ -67,3 +79,4 @@ directory to run tasks."
   :global t)
 
 (provide 'gradle-mode)
+;;; gradle-mode.el ends here
