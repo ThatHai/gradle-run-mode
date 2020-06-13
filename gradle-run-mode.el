@@ -69,6 +69,11 @@
   (interactive)
   (gradle-run--exec "build" gradle-run-env-vars))
 
+(defun gradle-run-test ()
+  "Run gradle test task."
+  (interactive)
+  (gradle-run--exec "test" gradle-run-env-vars))
+
 (defun gradle-run--exec (build-args env-vars)
   "Run gradle with the specified build arguments and environment variables.
 
@@ -86,6 +91,8 @@ ENV-VARS the environment variables to use when running gradle."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-g b") 'gradle-run-build)
     (define-key map (kbd "C-c C-g r") 'gradle-run)
+    (define-key map (kbd "C-c C-g t") 'gradle-run-test)
+    (define-key map (kbd "C-c C-g v") 'gradle-run-set-env)
     map)
   "Keymap for the gradle minor mode.")
 

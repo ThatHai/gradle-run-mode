@@ -25,11 +25,14 @@ Or with use-package, supposing the load path is `~/.emacs.d/site-lisp`:
 ## Usage
 * `C-c C-g b`
    + To run Gradle build task.
+   
+* `C-c C-g t`
+   + To run the Gradle test task.
 
 * `C-c C-g r`
    + To run Gradle by interactiely entering run arguments just like running from the command line.
 
-* `M-x gradle-run-set-env`
+* `C-c C-g v` or `M-x gradle-run-set-env`
    + To interactively set the environment variables for the project build. e.g. A project may use an environment variable to specify the deployment directory. Enter them the same way you would from the command line. e.g.
    ```
    ENVIRONMENT=testing APP_HOME=~/apps/awesome
