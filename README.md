@@ -15,7 +15,7 @@ Put `gradle-run-mode.el` somwewhere on Emacs load path. Then configure this mode
 (gradle-run-mode)
 ```
 
-Or with use-package, supposing the load path is `~/.emacs.d/site-lisp`:
+Or with use-package, supposing `gradle-run-mode.el` is under the load path `~/.emacs.d/site-lisp`:
 ```
 (use-package gradle-run-mode
   :load-path "site-lisp"
