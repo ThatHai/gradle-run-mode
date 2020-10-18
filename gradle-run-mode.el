@@ -1,4 +1,4 @@
-;;; gradle-mode.el --- Minor mode for running gradle build.
+;;; gradle-run-mode.el --- Minor mode for running gradle build.
 
 ;; Version: 0.5
 
